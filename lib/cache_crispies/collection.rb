@@ -53,15 +53,17 @@ module CacheCrispies
       uncached_models = cache_keys_with_model.fetch_values(*uncached_keys)
       @serializer.preloads(uncached_models, options)
 
-      new_entries = uncached_keys.map do |key|
-        serializer.new(cache_keys_with_model[key], options).as_json
+      new_entries = uncached_keys.each_with_object({}) do |key, hash|
+        hash[key] = serializer.new(cache_keys_with_model[key], options).as_json
       end
 
       CacheCrispies.cache.write_multi(new_entries)
 
       results = []
+      new_entries_values = new_entries.values
+
       cache_keys_with_model.keys.each do |key|
-        results << (cached_keys_with_values[key] || new_entries.shift)
+        results << (cached_keys_with_values[key] || new_entries_values.shift)
       end
       results
     end
