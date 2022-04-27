@@ -41,24 +41,29 @@ module CacheCrispies
     end
 
     def cached_json
-      models_by_cache_key = collection.each_with_object({}) do |model, hash|
+      cache_keys_with_model = collection.each_with_object({}) do |model, hash|
         plan = Plan.new(serializer, model, **options)
 
         hash[plan.cache_key] = model
       end
 
-      already_cached = CacheCrispies.cache.read_multi(*models_by_cache_key.keys)
+      cached_keys_with_values = CacheCrispies.cache.read_multi(*cache_keys_with_model.keys)
 
-      missing_keys = models_by_cache_key.keys - already_cached.keys
-      missing_values = models_by_cache_key.fetch_values(*missing_keys)
-      @serializer.preloads(missing_values, options)
+      uncached_keys = cache_keys_with_model.keys - cached_keys_with_values.keys
+      uncached_models = cache_keys_with_model.fetch_values(*uncached_keys)
+      @serializer.preloads(uncached_models, options)
 
-      new_entries = missing_keys.each_with_object({}) do |key, hash|
-        hash[key] = serializer.new(models_by_cache_key[key], options).as_json
+      new_entries = uncached_keys.map do |key|
+        serializer.new(cache_keys_with_model[key], options).as_json
       end
 
       CacheCrispies.cache.write_multi(new_entries)
-      new_entries.values + already_cached.values
+
+      results = []
+      cache_keys_with_model.keys.each do |key|
+        results << (cached_keys_with_values[key] || new_entries.shift)
+      end
+      results
     end
   end
 end
