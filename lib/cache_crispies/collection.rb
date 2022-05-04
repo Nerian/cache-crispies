@@ -57,7 +57,7 @@ module CacheCrispies
         hash[key] = serializer.new(cache_keys_with_model[key], options).as_json
       end
 
-      CacheCrispies.cache.write_multi(new_entries)
+      CacheCrispies.cache.write_multi(new_entries) if new_entries.present?
 
       results = []
       new_entries_values = new_entries.values
@@ -65,6 +65,7 @@ module CacheCrispies
       cache_keys_with_model.keys.each do |key|
         results << (cached_keys_with_values[key] || new_entries_values.shift)
       end
+
       results
     end
   end

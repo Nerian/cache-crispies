@@ -47,10 +47,10 @@ module CacheCrispies
 
       serializer_json =
         if plan.collection?
-          plan.cache do
-            CacheCrispies::Collection.new(
-              cacheable, serializer, options
-            ).as_json
+          if plan.collection_cache?
+            plan.cache { CacheCrispies::Collection.new(cacheable, serializer, options).as_json }
+          else
+            CacheCrispies::Collection.new(cacheable, serializer, options).as_json
           end
         else
           plan.cache { serializer.new(cacheable, options).as_json }

@@ -43,6 +43,16 @@ module CacheCrispies
       HashBuilder.new(self).call
     end
 
+    def warm_cache(options = {})
+      plan = CacheCrispies::Plan.new(
+        self.class,
+        model,
+        **options
+      )
+
+      plan.cache { self.class.new(model, options).as_json }
+    end
+
     # Get or set whether or not this serializer class should allow caching of
     # results. It returns false by default, but can be overridden in child
     # classes. Calling the method with an argument will set the value, calling
@@ -60,8 +70,19 @@ module CacheCrispies
       @do_caching = !!value
     end
 
+    def self.do_collection_caching(value = nil)
+      @do_collection_caching ||= false
+
+      # method called with no args so act as a getter
+      return @do_collection_caching if value.nil?
+
+      # method called with args so act as a setter
+      @do_collection_caching = !!value
+    end
+
     class << self
       alias do_caching? do_caching
+      alias do_collection_caching? do_collection_caching
     end
 
     # Get or set a JSON key to use as a root key on a non-collection

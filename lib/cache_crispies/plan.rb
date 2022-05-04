@@ -75,6 +75,10 @@ module CacheCrispies
       end
     end
 
+    def collection_cache?
+      serializer.do_collection_caching? && cacheable.respond_to?(CacheCrispies.config.cache_key_method)
+    end
+
     # Wraps a value in a JSON key/object. Returns json_hash directly if there
     # is no key.
     #

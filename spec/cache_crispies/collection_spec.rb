@@ -100,9 +100,7 @@ describe CacheCrispies::Collection do
               { 'cereal-key-1' => { name: name1 }, 'cereal-key-2' => { name: name2 } }
             )
 
-          expect(CacheCrispies).to receive_message_chain(
-            :cache, :write_multi
-          ).with({})
+          expect(CacheCrispies).to receive(:cache)
 
           subject.as_json
         end
