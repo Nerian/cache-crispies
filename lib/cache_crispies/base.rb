@@ -49,8 +49,9 @@ module CacheCrispies
         model,
         **options
       )
-
-      CacheCrispies.cache.write(plan.cache_key, self.class.new(model, options).as_json)
+      payload = self.class.new(model, options).as_json
+      CacheCrispies.cache.write(plan.cache_key, payload)
+      payload
     end
 
     # Get or set whether or not this serializer class should allow caching of
