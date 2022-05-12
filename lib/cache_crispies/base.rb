@@ -217,12 +217,7 @@ module CacheCrispies
     private_class_method :file_hash
 
     def self.path
-      @path ||= begin
-        parts = %w[app serializers]
-        parts += to_s.deconstantize.split('::').map(&:underscore)
-        parts << "#{to_s.demodulize.underscore}.rb"
-        Rails.root.join(*parts)
-      end
+      @path ||= Object.const_source_location(to_s).first
     end
     private_class_method :path
 
