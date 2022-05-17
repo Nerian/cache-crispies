@@ -22,7 +22,7 @@ module CacheCrispies
     #
     # @return [Hash] the JSON-ready Hash
     def as_json
-      if serializer.do_caching? && collection.respond_to?(:cache_key)
+      if serializer.do_caching?
         cached_json
       else
         uncached_json
